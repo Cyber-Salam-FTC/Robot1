@@ -1,0 +1,66 @@
+{
+  // ================= Java Project Import =================
+  // Lets the Java language server resolve FTC SDK classes
+  // (DcMotor, Telemetry, LinearOpMode, etc.) via Gradle.
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.wrapper.enabled": true,
+  "java.import.gradle.offline.enabled": false,
+  "java.import.gradle.java.home": "C:\\Users\\zidan\\AppData\\Local\\Programs\\Microsoft\\jdk-17.0.18.8-hotspot",
+  "java.import.gradle.jvmArgs": "-Xmx2g",
+  "java.project.importOnFirstTimeStartup": "automatic",
+  "java.showBuildStatusOnStart.enabled": true,
+
+  // Turn off "random" errors while Gradle is importing:
+  // incomplete classpath -> warning instead of red underline,
+  // speculative null-check errors -> disabled.
+  "java.errors.incompleteClasspath.severity": "ignore",
+  "java.compile.nullAnalysis.mode": "disabled",
+
+  // JVM that runs the language server itself (must be 17+)
+  "java.jdt.ls.java.home": "C:\\Users\\zidan\\AppData\\Local\\Programs\\jdk-21\\jdk-21.0.11+10",
+
+  // JDKs available for compiling/resolving the project.
+  // FTC targets Java 8 syntax; JDK 17 compiles it fine.
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-1.8",
+      "path": "C:\\Users\\zidan\\AppData\\Local\\Programs\\Microsoft\\jdk-17.0.18.8-hotspot",
+      "default": true
+    },
+    {
+      "name": "JavaSE-17",
+      "path": "C:\\Users\\zidan\\AppData\\Local\\Programs\\Microsoft\\jdk-17.0.18.8-hotspot"
+    },
+    {
+      "name": "JavaSE-21",
+      "path": "C:\\Users\\zidan\\AppData\\Local\\Programs\\jdk-21\\jdk-21.0.11+10"
+    }
+  ],
+
+  // ================= Completion Behavior =================
+  "java.completion.enabled": true,
+  "java.completion.postfix.enabled": true,
+  "java.completion.guessMethodArguments": "insertBestGuessedArguments",
+  "java.completion.matchCase": "firstLetter",
+  "java.signatureHelp.enabled": true,
+
+  // ================= Editor Suggestions =================
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.tabCompletion": "on",
+  "editor.suggest.localityBonus": true,
+  "editor.suggestSelection": "first",
+  "editor.stickyScroll.enabled": true,
+
+  // Hide build artifacts from the explorer/search (cosmetic)
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true
+  }
+}
