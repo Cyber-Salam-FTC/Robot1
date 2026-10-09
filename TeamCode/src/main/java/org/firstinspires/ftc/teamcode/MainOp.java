@@ -1,15 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.cybersalam.hardware.MecanumDrive;
 
+@TeleOp(name = "mainop")
 public class MainOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         MecanumDrive drive = new MecanumDrive();
 
-        drive.init(hardwareMap);
+        drive.init(hardwareMap, true);
 
         waitForStart();
 

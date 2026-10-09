@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.pedropathing;
+package org.firstinspires.ftc.teamcode.pedropathing.autotuners;
 
 import com.pedropathing.tuning.autotune.*;
 import com.pedropathing.tuning.autotune.Display.FourWheelBot.Wheel;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.pedropathing.Direction;
 
 public class MecanumTuner extends Procedure {
     public MecanumTuner() {

@@ -14,32 +14,30 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class Constants {
-    public static MecanumConfig drivetrainConfig = new MecanumConfig(
-            c -> {
-                c.frontLeftName.set("leftFront");
-                c.backLeftName.set("leftRear");
-                c.frontRightName.set("rightFront");
-                c.backRightName.set("rightRear");
+    public static MecanumConfig drivetrainConfig = new MecanumConfig(c -> {
+        c.frontLeftName.set("leftFront");
+        c.frontRightName.set("rightFront");
+        c.backLeftName.set("leftRear");
+        c.backRightName.set("rightRear");
+        c.frontLeftDirection.set(DcMotorSimple.Direction.REVERSE);
+        c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
+        c.backLeftDirection.set(DcMotorSimple.Direction.REVERSE);
+        c.backRightDirection.set(DcMotorSimple.Direction.FORWARD);
+    });
 
-                c.frontLeftDirection.set(DcMotorSimple.Direction.REVERSE);
-                c.backLeftDirection.set(DcMotorSimple.Direction.REVERSE);
-                c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
-                c.backRightDirection.set(DcMotorSimple.Direction.FORWARD);
-
-                c.manualBrakeMode.set(true);
-            }
-    );
-
-    public static PinpointConfig localizerConfig = new PinpointConfig(
-            c -> {
-                c.name.set("pinpointComputer");
-                c.xPodOffset.set(14.3003496461);
-                c.yPodOffset.set(-14.3003496461);
-                c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
-                c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
-            }
-    );
+    public static PinpointConfig localizerConfig = new PinpointConfig(c -> {
+        c.name.set("pinpointComputer");
+        c.podType.set(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        c.xPodOffset.set(6.065023827740527);
+        c.yPodOffset.set(-0.6211368305476632);
+        c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        c.globalDistanceUnit.set(DistanceUnit.INCH);
+        c.offsetUnits.set(DistanceUnit.INCH);
+    });
 
     public static ForesightConfig foresightConfig = new ForesightConfig(
             c -> {
