@@ -1,210 +1,147 @@
+// red for both autos
+
 package org.firstinspires.ftc.teamcode.auto;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.api.PoseFactory;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.pedroPathing.PedroConstants;
 
-@Autonomous(name = "solo auto", group = "Autonomous")
-@Configurable
+import org.firstinspires.ftc.teamcode.pedropathing.Constants;
+
+import static com.pedropathing.api.Paths.line;
+
+@Autonomous(name = "duo auto", group = "Autonomous")
 public class duoAuto extends OpMode {
 
-    private TelemetryManager panelsTelemetry;
-    public Follower follower;
-    private int pathState;
-    private ElapsedTime pathTimer;
-    private Paths paths;
+    private Follower follower;
+    private Path[] paths;
+
+    private final ElapsedTime pauseTimer = new ElapsedTime();
+
+    private int pathIndex;
+    private boolean waiting;
+    private boolean finished;
+
+    private final double[] pauses = {0.5, 0, 0, 0, 0, 0};
+
+    private final PoseFactory p = PoseFactory.degrees();
+
+    private final Pose startPose = p.of(56, 8, 90);
+    private final Pose line1End = p.of(56, 24, 90);
+    private final Pose line2End = p.of(20, 28, 180);
+    private final Pose line3End = p.of(5, 28, 180);
+    private final Pose line4End = p.of(16, 28, 180);
+    private final Pose line5End = p.of(30, 120, 0);
+    private final Pose line6End = p.of(58, 120, -90);
 
     @Override
     public void init() {
-        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        panelsTelemetry.debug("status", "initialized");
-        panelsTelemetry.update(telemetry);
+        follower = Constants.createFollower(hardwareMap);
+        follower.setPose(startPose);
 
-        follower = PedroConstants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(56, 8, Math.toRadians(90)));
+        paths = new Path[] {
+                line(startPose, line1End)
+                        .linear(startPose, line1End),
 
-        pathTimer = new ElapsedTime();
-        paths = new Paths(follower);
+                line(line1End, line2End)
+                        .linear(line1End, line2End),
+
+                line(line2End, line3End)
+                        .linear(line2End, line3End),
+
+                line(line3End, line4End)
+                        .linear(line3End, line4End),
+
+                line(line4End, line5End)
+                        .linear(line4End, line5End),
+
+                line(line5End, line6End)
+                        .linear(line5End, line6End)
+        };
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Start Pose", startPose);
+        telemetry.addLine("Press PLAY to begin.");
+    }
+
+    @Override
+    public void start() {
+        pathIndex = 0;
+        waiting = false;
+        finished = false;
+
+        follower.follow(paths[pathIndex]);
     }
 
     @Override
     public void loop() {
+        if (gamepad1.b) {
+            requestOpModeStop();
+            return;
+        }
+
         follower.update();
-        pathState = autonomousPathUpdate();
 
-        panelsTelemetry.debug("state", pathState);
-        panelsTelemetry.debug("x", follower.getPose().getX());
-        panelsTelemetry.debug("y", follower.getPose().getY());
-        panelsTelemetry.debug("heading", follower.getPose().getHeading());
-        panelsTelemetry.update(telemetry);
+        if (!finished) {
+            updatePaths();
+        }
+
+        telemetry.addData("Path", "%d / %d",
+                pathIndex + 1, paths.length);
+        telemetry.addData("Status",
+                finished ? "Finished"
+                        : waiting ? "Pausing" : "Following");
+        telemetry.addData("Busy", follower.isBusy());
+        telemetry.addData("Pose", follower.pose());
+        telemetry.addData("X", follower.pose().x());
+        telemetry.addData("Y", follower.pose().y());
+
+        if (waiting) {
+            telemetry.addData("Pause Remaining (s)", "%.2f",
+                    Math.max(
+                            0,
+                            pauses[pathIndex] - pauseTimer.seconds()
+                    ));
+        }
+
+        telemetry.addLine("Press B or STOP to abort.");
+        telemetry.update();
     }
 
-    public static class Paths {
+    private void updatePaths() {
+        if (waiting) {
+            if (pauseTimer.seconds() >= pauses[pathIndex]) {
+                advancePath();
+            }
+            return;
+        }
 
-        public PathChain line1;
-        public PathChain line2;
-        public PathChain line3;
-        public PathChain line4;
-        public PathChain line5;
-        public PathChain line6;
+        if (follower.isBusy()) {
+            return;
+        }
 
-        public Paths(Follower follower) {
-            line1 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(56, 8),
-
-                                    new Pose(56, 12)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(90))
-                    .build();
-
-            line2 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(56, 12),
-
-                                    new Pose(20, 8)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-                    .build();
-
-            line3 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(20, 8),
-
-                                    new Pose(8, 8)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                    .build();
-
-            line4 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(8, 8),
-
-                                    new Pose(20, 8)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                    .build();
-
-            line5 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(20, 8),
-
-                                    new Pose(30, 120)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(0))
-                    .build();
-
-            line6 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(30, 120),
-
-                                    new Pose(59, 120)
-                            )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(-90))
-                    .build();
+        if (pauses[pathIndex] > 0) {
+            waiting = true;
+            pauseTimer.reset();
+        } else {
+            advancePath();
         }
     }
 
-    public int autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                follower.followPath(paths.line1, true);
-                setPathState(1);
-                break;
-            case 1:
-                if (!follower.isBusy()) {
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                setPathState(3);
-                break;
-            case 3:
-                if (pathTimer.getMilliseconds() > 500) {
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                follower.followPath(paths.line2, true);
-                setPathState(5);
-                break;
-            case 5:
-                if (!follower.isBusy()) {
-                    setPathState(6);
-                }
-                break;
-            case 6:
-                follower.followPath(paths.line3, true);
-                setPathState(7);
-                break;
-            case 7:
-                if (!follower.isBusy()) {
-                    setPathState(8);
-                }
-                break;
-            case 8:
-                follower.followPath(paths.line4, true);
-                setPathState(9);
-                break;
-            case 9:
-                if (!follower.isBusy()) {
-                    setPathState(10);
-                }
-                break;
-            case 10:
-                follower.followPath(paths.line5, true);
-                setPathState(11);
-                break;
-            case 11:
-                if (!follower.isBusy()) {
-                    setPathState(12);
-                }
-                break;
-            case 12:
-                follower.followPath(paths.line6, true);
-                setPathState(13);
-                break;
-            case 13:
-                if (!follower.isBusy()) {
-                    setPathState(14);
-                }
-                break;
-            case 14:
-                requestOpModeStop();
-                pathState = -1;
-                break;
-        }
-        return pathState;
-    }
+    private void advancePath() {
+        waiting = false;
 
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.reset();
+        if (pathIndex == paths.length - 1) {
+            finished = true;
+            requestOpModeStop();
+            return;
+        }
+
+        pathIndex++;
+        follower.follow(paths[pathIndex]);
     }
 }
